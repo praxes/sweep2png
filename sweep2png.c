@@ -74,6 +74,10 @@ static int read_mesh(SAMPLE *sample){
   rm->ymax=(double)f[3];
   rm->zmin=(double)f[4];
   rm->zmax=(double)f[5];
+  if(rm->nvz==0) {
+    rm->nvoxels=(long)i1*(long)i2;
+    rm->nvz = 1;
+  }
 
   printf("nv %ld x=[%f,%f] y=[%f,%f] z=[%f,%f]\n",rm->nvoxels,rm->xmin,rm->xmax,rm->ymin,rm->ymax,rm->zmin,rm->zmax);
 
@@ -89,6 +93,11 @@ static int read_mesh(SAMPLE *sample){
 
     fgets (line, LINE_LEN, fp);
     sscanf(line,"%i %i %i %i %f %f %f %i",&i1,&i2,&i3,&i4,&f[0],&f[1],&f[2],&i5);
+    if(rm->zmin==rm->zmax) {
+      sscanf(line,"%i %i %i %f %f %i",&i1,&i2,&i3,&f[0],&f[1],&i5);
+      i4=0;
+      f[2]=0;
+    }
 
     v->id=(long)i1;
     v->ix=i2;

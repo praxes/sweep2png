@@ -11,6 +11,9 @@ int write_pngs_color(SAMPLE *sample);
 int write_pngs_confidence(SAMPLE *sample);
 
 static int convrodtocolor(double *r, double *c);
+static int convhkltocolor_cubic(double *U, double *c);
+static int convhkltocolor_hexagonal(double *U, double *c);
+
 
 //---------------------- PNG ----------------------------------------
 
@@ -237,7 +240,9 @@ int write_pngs_color(SAMPLE *sample) {
 	ORIENTATION *or=&(v->orientation[maxi]);
 	double c[3];
 
-	convrodtocolor(&(or->r[0]), &c[0]);
+/*	convrodtocolor(&(or->r[0]), &c[0]);
+	convhkltocolor_cubic(&(or->U[0]), &c[0]); */
+	convhkltocolor_hexagonal(&(or->U[0]), &c[0]);
 
 	pixel->red   = c[0]*255;
 	pixel->green = c[1]*255;
@@ -285,6 +290,170 @@ static int convrodtocolor(double *r, double *c){
   c[0] = (r1*theta-minhx)/(maxhx-minhx); // red
   c[1] = (r2*theta-minhy)/(maxhy-minhy); // green
   c[2] = (r3*theta-minhz)/(maxhz-minhz); // blue
+
+  return (SUCCESS);
+}
+
+
+static int convhkltocolor_cubic(double *U, double *c){
+  // converts hkl (U31,U32,U33) to colour in cubic stereographic triangle
+
+  double pi = 3.14159;
+  double beta = 0;
+  int i,j;
+
+  double axis[3];
+  axis[0] = fabs(U[6]);
+  axis[1] = fabs(U[7]);
+  axis[2] = fabs(U[8]);
+
+  for(j=0;j<2;j++){
+    for(i=j+1;i<3;i++){
+      if (axis[j]>axis[i]){
+        c[0]=axis[j];
+        axis[j]=axis[i];
+        axis[i]=c[0];
+      }
+    }
+  }
+
+  double r=sqrt(axis[0]*axis[0]/((axis[2]+1))/((axis[2]+1))+(axis[1]/(axis[2]+1)+1)*(axis[1]/(axis[2]+1)+1));
+  if (axis[1]==0) {
+    beta=0;
+  }
+  else {
+    beta=atan(axis[0]/axis[1]);
+  }
+
+  //normalise colors
+  double exponent = 0.5;
+
+  c[0] = pow((sqrt(2.0)-r)/(sqrt(2.0)-1),exponent); // red
+  c[1] = pow((1-4*beta/pi)*((r-1)/(sqrt(2.0)-1)),exponent); // green
+  c[2] = pow(4*beta/pi*((r-1)/(sqrt(2.0)-1)),exponent); // blue
+
+  return (SUCCESS);
+}
+
+
+static int convhkltocolor_hexagonal(double *U, double *c){
+  // converts hkl (U31,U32,U33) to colour in hexagonal stereographic triangle
+
+  int j;
+
+  double rot[108];
+  rot[0*9+0]= 1;  rot[0*9+1]= 0;  rot[0*9+2]= 0;
+  rot[0*9+3]= 0;  rot[0*9+4]= 1;  rot[0*9+5]= 0;
+  rot[0*9+6]= 0;  rot[0*9+7]= 0;  rot[0*9+8]= 1;
+
+  rot[1*9+0]= -0.5;        rot[1*9+1]= -sqrt(0.75);  rot[1*9+2]= 0;
+  rot[1*9+3]= sqrt(0.75);  rot[1*9+4]= -0.5;         rot[1*9+5]= 0;
+  rot[1*9+6]= 0;           rot[1*9+7]= 0;            rot[1*9+8]= 1;
+
+  rot[2*9+0]= -0.5;        rot[2*9+1]= sqrt(0.75);   rot[2*9+2]= 0;
+  rot[2*9+3]= -sqrt(0.75); rot[2*9+4]= -0.5;         rot[2*9+5]= 0;
+  rot[2*9+6]= 0;           rot[2*9+7]= 0;            rot[2*9+8]= 1;
+
+  rot[3*9+0]= -1; rot[3*9+1]= 0;  rot[3*9+2]= 0;
+  rot[3*9+3]= 0;  rot[3*9+4]= -1; rot[3*9+5]= 0;
+  rot[3*9+6]= 0;  rot[3*9+7]= 0;  rot[3*9+8]= 1;
+
+  rot[4*9+0]= 0.5;         rot[4*9+1]= sqrt(0.75);  rot[4*9+2]= 0;
+  rot[4*9+3]= -sqrt(0.75); rot[4*9+4]= 0.5;         rot[4*9+5]= 0;
+  rot[4*9+6]= 0;           rot[4*9+7]= 0;           rot[4*9+8]= 1;
+
+  rot[5*9+0]= 0.5;         rot[5*9+1]= -sqrt(0.75);  rot[5*9+2]= 0;
+  rot[5*9+3]= sqrt(0.75);  rot[5*9+4]= 0.5;          rot[5*9+5]= 0;
+  rot[5*9+6]= 0;           rot[5*9+7]= 0;            rot[5*9+8]= 1;
+
+  rot[6*9+0]= 0.5;         rot[6*9+1]= sqrt(0.75);  rot[6*9+2]= 0;
+  rot[6*9+3]= sqrt(0.75);  rot[6*9+4]= -0.5;        rot[6*9+5]= 0;
+  rot[6*9+6]= 0;           rot[6*9+7]= 0;           rot[6*9+8]= -1;
+
+  rot[7*9+0]= 0.5;         rot[7*9+1]= -sqrt(0.75);  rot[7*9+2]= 0;
+  rot[7*9+3]= -sqrt(0.75); rot[7*9+4]= -0.5;         rot[7*9+5]= 0;
+  rot[7*9+6]= 0;           rot[7*9+7]= 0;            rot[7*9+8]= -1;
+
+  rot[8*9+0]= -1; rot[8*9+1]= 0;  rot[8*9+2]= 0;
+  rot[8*9+3]= 0;  rot[8*9+4]= 1;  rot[8*9+5]= 0;
+  rot[8*9+6]= 0;  rot[8*9+7]= 0;  rot[8*9+8]= -1;
+
+  rot[9*9+0]= -0.5;        rot[9*9+1]= -sqrt(0.75); rot[9*9+2]= 0;
+  rot[9*9+3]= -sqrt(0.75); rot[9*9+4]= 0.5;         rot[9*9+5]= 0;
+  rot[9*9+6]= 0;           rot[9*9+7]= 0;           rot[9*9+8]= -1;
+
+  rot[10*9+0]= -0.5;        rot[10*9+1]= sqrt(0.75);  rot[10*9+2]= 0;
+  rot[10*9+3]= sqrt(0.75);  rot[10*9+4]= 0.5;         rot[10*9+5]= 0;
+  rot[10*9+6]= 0;           rot[10*9+7]= 0;           rot[10*9+8]= -1;
+
+  rot[11*9+0]= 1;  rot[11*9+1]= 0;  rot[11*9+2]= 0;
+  rot[11*9+3]= 0;  rot[11*9+4]= -1; rot[11*9+5]= 0;
+  rot[11*9+6]= 0;  rot[11*9+7]= 0;  rot[11*9+8]= -1;
+
+  double square=1.;
+  double angle = 0;
+  double frac = sqrt(1/3.);
+  double g[9],uvw[3],uvw_final[3];
+  double a,x,y,f,s;
+  double Amat[9];
+  Amat[0] = 0; Amat[1] = 1;         Amat[2] = 0;
+  Amat[3] = 0; Amat[4] = -sqrt(3.); Amat[5] = 1;
+  Amat[6] = 1; Amat[7] = 0;         Amat[8] = 0;
+  double a0=1/sqrt(3.);
+  double a1=1;
+  double a2=1;
+
+  for(j=0;j<12;j++){
+    g[0] = U[0]*rot[j*9+0] + U[1]*rot[j*9+3] + U[2]*rot[j*9+6];
+    g[1] = U[0]*rot[j*9+1] + U[1]*rot[j*9+4] + U[2]*rot[j*9+7];
+    g[2] = U[0]*rot[j*9+2] + U[1]*rot[j*9+5] + U[2]*rot[j*9+8];
+    g[3] = U[3]*rot[j*9+0] + U[4]*rot[j*9+3] + U[5]*rot[j*9+6];
+    g[4] = U[3]*rot[j*9+1] + U[4]*rot[j*9+4] + U[5]*rot[j*9+7];
+    g[5] = U[3]*rot[j*9+2] + U[4]*rot[j*9+5] + U[5]*rot[j*9+8];
+    g[6] = U[6]*rot[j*9+0] + U[7]*rot[j*9+3] + U[8]*rot[j*9+6];
+    g[7] = U[6]*rot[j*9+1] + U[7]*rot[j*9+4] + U[8]*rot[j*9+7];
+    g[8] = U[6]*rot[j*9+2] + U[7]*rot[j*9+5] + U[8]*rot[j*9+8];
+
+    a = acos((g[0]+g[4]+g[8]-1)*0.5);
+    if (g[8]>0) {
+      uvw[0] = g[6];  uvw[1] = g[7];  uvw[2] = g[8];
+    }
+    else {
+      uvw[0] = -g[6];  uvw[1] = -g[7];  uvw[2] = -g[8];
+    }
+    x = uvw[0]/(1+uvw[2]);
+    y = uvw[1]/(1+uvw[2]);
+    f = y/x;
+    s = x*x+y*y;
+    if ((f<=frac)&&(s<=square)&&(x>=0)&&(y>=0)){
+	angle = a;
+	frac = f;
+	square = s;
+	uvw_final[0] = uvw[0];
+	uvw_final[1] = uvw[1];
+	uvw_final[2] = uvw[2];
+    }
+  }
+
+
+  //normalise colors
+  double exponent = 0.7;
+  double axis[3];
+  axis[0] = pow(Amat[0]*uvw_final[0]+Amat[3]*uvw_final[1]+Amat[6]*uvw_final[2],exponent);
+  axis[1] = pow(Amat[1]*uvw_final[0]+Amat[4]*uvw_final[1]+Amat[7]*uvw_final[2],exponent);
+  axis[2] = pow(Amat[2]*uvw_final[0]+Amat[5]*uvw_final[1]+Amat[8]*uvw_final[2],exponent);
+
+  c[0] = axis[0]/(a2); // red
+  c[1] = axis[1]/(a1); // green
+  c[2] = axis[2]/(a0); // blue
+
+  double mx=c[0];
+  if (c[1] > mx) { mx = c[1]; }
+  if (c[2] > mx) { mx = c[2]; }
+
+  c[0] = c[0]/(mx); // red
+  c[1] = c[1]/(mx); // green
+  c[2] = c[2]/(mx); // blue
 
   return (SUCCESS);
 }

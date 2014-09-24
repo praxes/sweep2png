@@ -1,1 +1,4 @@
-gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/local/include/ /usr/local/lib/libpng.so -lm -o sweep2png
+#gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/local/include/ /usr/local/lib/libpng.so -lm -o sweep2png
+#gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/include/ /home/specuser/envs/my_root/lib/libpng.so -lm -o sweep2png
+#gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/local/include/ /usr/local/lib/libpng.so -lm -o sweep2png
+gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/include/ #/usr/lib64/libpng.so -lm -o sweep2png
