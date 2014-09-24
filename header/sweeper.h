@@ -4,8 +4,8 @@
 #define FAILURE -1
 #define SUCCESS  1
 
-enum sweep_modes { SINGLEPOINT, MAPPING }; 
-enum subarea_modes { BOX, CIRCLE }; 
+enum sweep_modes { SINGLEPOINT, MAPPING };
+enum subarea_modes { BOX, CIRCLE };
 
 typedef struct {
   int n_exp;
@@ -42,7 +42,7 @@ typedef struct {
   double R[9];
   double invR[9];
 
-  int z_dead_min; /* defines inactive areas on detector, e.g. gab on quantix */ 
+  int z_dead_min; /* defines inactive areas on detector, e.g. gab on quantix */
   int z_dead_max;
 } IMAGE;
 
@@ -96,7 +96,7 @@ typedef struct {
   double invR[9];
 } DETECTORPOS;
 
-typedef struct {  
+typedef struct {
   long grain_id;  // grain id
   int method; // which indexing method
   double U[9];
@@ -218,7 +218,7 @@ typedef struct {
   /* eta settings */
   double min_eta;
   double max_eta;
-  double deta;  
+  double deta;
   /* cuts in eta */
   double pole_angle;
   /* omega settings */
@@ -241,11 +241,11 @@ typedef struct {
   int stepimg;
   /* filenames */
   char inputdir[300];
-  char outputdir[300];  
-  char outputfilestem[300];  
-  char inputmapname[300];  
-  char rgrainsfile[300];  
-  char gfffile[300];  
+  char outputdir[300];
+  char outputfilestem[300];
+  char inputmapname[300];
+  char rgrainsfile[300];
+  char gfffile[300];
   char input_2Dmeshfile[300];
   char input_meshfile[300];
   /* modes */
@@ -277,7 +277,7 @@ typedef struct {
 
   int ngrains;
   GRAIN *grain;
-  
+
   int mode; /* Single point or mapping */
 
   double max_r;
@@ -288,7 +288,7 @@ typedef struct {
   double density_cut;
   double lowest_density_cut;
   double max_Ldist;
-  
+
   double dx_fit_connect;
   double dy_fit_connect;
 
@@ -300,14 +300,14 @@ typedef struct {
 
   double completeness_cut;
   double refined_completeness_cut;
-  
+
   int min_maxR;
   double R_frac;
 
   double single_point_x;
   double single_point_y;
 
-  int z_dead_min; /* defines inactive areas on detector, e.g. gab on quantix */ 
+  int z_dead_min; /* defines inactive areas on detector, e.g. gab on quantix */
   int z_dead_max;
 
   int subarea_mode;
@@ -325,7 +325,7 @@ typedef struct {
   int *dist_fast;
   int n_rows;
   int n_cols;
-  
+
   int nscreens;
   SCREEN *screen;
 
@@ -349,7 +349,7 @@ typedef struct {
 typedef struct {
   double omega;
   double domega;
-  double min_omega; 
+  double min_omega;
   double max_omega;
   double eta;
   double deta;
@@ -363,7 +363,7 @@ typedef struct {
   double v[3];
   double length;
   double cosalpha;
-  int hklfam_index;  
+  int hklfam_index;
   int theo_scatvec_index_i;
   int theo_scatvec_index_j;
   double C;
@@ -434,7 +434,7 @@ typedef struct {
   int tmp_use;
 
   int useit;
-  
+
   int imin;
   double volume;
   double App; /* projected pixel area in sample plane */
@@ -454,14 +454,14 @@ typedef struct {
   int omega_bin_index;
   OMEGABIN *omega_bin;
   int n_eta_ranges;
-  int eta_range_index; 
+  int eta_range_index;
   ETARANGE eta_range[2];
   int cosalpha_index;
   HKLCLASS *hklclass;
   int pair_index;
-  PAIR *pair;  
+  PAIR *pair;
   int generator_index;
-  int sweepstate;  
+  int sweepstate;
 
   int *Rodrigues;
   long Rodrigues_N;
@@ -485,13 +485,13 @@ typedef struct {
 
   long maxRi;
 
-  int n_sigpos;  
-  SIGPOS *sigpos;  
+  int n_sigpos;
+  SIGPOS *sigpos;
 
   double chisq;
 
-  int tmp_n_sigpos;  
-  SIGPOS *tmp_sigpos;  
+  int tmp_n_sigpos;
+  SIGPOS *tmp_sigpos;
 
   int store_tsigpos;
 
@@ -504,13 +504,13 @@ typedef struct {
   int assign_orientation;
 
   int writetomap;
-  
+
   int voxel_accepted;
   double value;
 
   double density_cut;
   double lowest_density_cut;
-  
+
   int n_good_ref;
   double D_good_ref;
   double median_volume;
@@ -530,7 +530,7 @@ typedef struct {
 typedef struct {
 
   int imageid;
-  
+
   SCATVEC scatvec;
 
   int *Rodrigues_tmp;

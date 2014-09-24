@@ -24,13 +24,13 @@ int main(int argc, char *argv[]) {
 
   sprintf(sample.input_meshfile,"%s",argv[1]);
   sprintf(sample.outputfilestem,"%s",argv[2]);
-  
+
   {
     float f1;
     sscanf(argv[3],"%g",&f1);
     sample.completeness_cut=(double)f1;
   }
-  
+
   printf("mesh file: %s, png filestem: %s, min completeness: %f\n",
 	 sample.input_meshfile, sample.outputfilestem,sample.completeness_cut);
 
@@ -52,18 +52,18 @@ static int read_mesh(SAMPLE *sample){
   long i,j,k;
 
   RMESH *rm=&(sample->rmesh);
-  
+
   fp=fopen(sample->input_meshfile,"r");
-  
+
   if(fp==NULL) {
     printf("Cannot open %s\n",sample->input_meshfile);
     exit(1);
   }
-  
+
   for(k=0;k<3;k++) fgets (line, LINE_LEN, fp);
-  
+
   sscanf(line,"%i %i %i %f %f %f %f %f %f",&i1,&i2,&i3,&f[0],&f[1],&f[2],&f[3],&f[4],&f[5]);
-  
+
   rm->nvoxels=(long)i1*(long)i2*(long)i3;
   rm->nvx = i1;
   rm->nvy = i2;
@@ -76,20 +76,20 @@ static int read_mesh(SAMPLE *sample){
   rm->zmax=(double)f[5];
 
   printf("nv %ld x=[%f,%f] y=[%f,%f] z=[%f,%f]\n",rm->nvoxels,rm->xmin,rm->xmax,rm->ymin,rm->ymax,rm->zmin,rm->zmax);
-  
+
   if( (rm->voxel=(VOXEL *)calloc((size_t)(rm->nvoxels),(size_t)(sizeof(VOXEL))))==NULL ) {
     printf("Not enough memory to allocate rm->nvoxels\n");
     return (FAILURE);
   }
 
   for(k=0;k<6;k++) fgets (line, LINE_LEN, fp);
-  
+
   for(i=0;i<rm->nvoxels;i++){
     VOXEL *v=&(rm->voxel[i]);
 
     fgets (line, LINE_LEN, fp);
     sscanf(line,"%i %i %i %i %f %f %f %i",&i1,&i2,&i3,&i4,&f[0],&f[1],&f[2],&i5);
-    
+
     v->id=(long)i1;
     v->ix=i2;
     v->iy=i3;
@@ -112,7 +112,7 @@ static int read_mesh(SAMPLE *sample){
 
       for(j=0;j<v->nU;j++){
 	ORIENTATION *or=&(v->orientation[j]);
-	
+
 	fgets (line, LINE_LEN, fp);
 	sscanf(line,"%i %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %i %i %i %f",
 	       &i1,&i2,&i3,
@@ -126,11 +126,11 @@ static int read_mesh(SAMPLE *sample){
 
 	for(k=0;k<3;k++) or->r[k]=f[k];
 	for(k=0;k<9;k++) or->U[k]=f[6+k];
-	
+
 	or->ntested = i3;
 	or->nmeasured = i4;
 	or->nfailed = i5;
-	or->completeness = f[15];	
+	or->completeness = f[15];
 
 	//	printf("  %02ld: r %f %f %f, ntested %i nmeasured %i nfailed %i completeness %f\n",j,or->r[0],or->r[1],or->r[2],or->ntested,or->nmeasured,or->nfailed,or->completeness);
 
@@ -140,8 +140,8 @@ static int read_mesh(SAMPLE *sample){
       for(k=0;k<3;k++) fgets (line, LINE_LEN, fp);
     }
   }
-  
+
   fclose(fp);
-  
+
   return (SUCCESS);
 }

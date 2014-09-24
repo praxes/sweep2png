@@ -17,7 +17,7 @@ typedef struct {
   double sintth_div_Fhkl2;
 } THEOSCATVEC;
 
-typedef struct { /* one for each {hkl} */ 
+typedef struct { /* one for each {hkl} */
   int hklfam_index2;
   int n_generators;
   double *invgenerator;
@@ -26,7 +26,7 @@ typedef struct { /* one for each {hkl} */
 typedef struct {
   double alpha;
   double cosalpha;
-  int hklfam_index1; 
+  int hklfam_index1;
   int n_pairs;
   PAIR *pair;
 } HKLCLASS;
@@ -50,14 +50,14 @@ typedef struct {
   long nhklfam;
   THEOSCATVEC *theoscatvec;
   COSALPHA *cosalpha; /* array: pointer to the first cosalpha pair for i'th {hkl} family */
-  int *ncosalpha;  /* array: number of cosalpha pairs for i'th {hkl} family */  
+  int *ncosalpha;  /* array: number of cosalpha pairs for i'th {hkl} family */
   int nEqMat;
   double *EqMat;
   int nrefl_total;
 
   int nFhkl2;
   double *Fhkl2;
-  
+
 } CRYSTSTRUCT;
 
 #endif
