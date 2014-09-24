@@ -13,6 +13,7 @@ int write_pngs_confidence(SAMPLE *sample);
 static int convrodtocolor(double *r, double *c);
 static int convhkltocolor_cubic(double *U, double *c);
 static int convhkltocolor_hexagonal(double *U, double *c);
+static int convhkltocolor_orthorhombic(double *U, double *c);
 
 //---------------------- PNG ----------------------------------------
 
@@ -240,8 +241,9 @@ int write_pngs_color(SAMPLE *sample) {
 	double c[3];
 
 /*	convrodtocolor(&(or->r[0]), &c[0]);
-	convhkltocolor_cubic(&(or->U[0]), &c[0]); */
-	convhkltocolor_hexagonal(&(or->U[0]), &c[0]);
+	convhkltocolor_cubic(&(or->U[0]), &c[0]);
+	convhkltocolor_hexagonal(&(or->U[0]), &c[0]); */
+	convhkltocolor_orthorhombic(&(or->U[0]), &c[0]);
 
 	pixel->red   = c[0]*255;
 	pixel->green = c[1]*255;
@@ -457,3 +459,23 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   return (SUCCESS);
 }
 
+
+static int convhkltocolor_orthorhombic(double *U, double *c){
+  // converts hkl (U31,U32,U33) to colour in orthorhombic stereographic triangle
+
+  double pi = 3.14159;
+
+  double axis[3];
+  axis[0] = fabs(U[6]);
+  axis[1] = fabs(U[7]);
+  axis[2] = fabs(U[8]);
+
+  //normalise colors
+  double exponent = 0.5;
+
+  c[0] = pow(2*asin(axis[2])/pi,exponent); // red
+  c[1] = pow(2*asin(axis[0])/pi,exponent); // green
+  c[2] = pow(2*asin(axis[1])/pi,exponent); // blue
+
+  return (SUCCESS);
+}
