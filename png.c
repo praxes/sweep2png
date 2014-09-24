@@ -11,6 +11,8 @@ int write_pngs_color(SAMPLE *sample);
 int write_pngs_confidence(SAMPLE *sample);
 
 static int convrodtocolor(double *r, double *c);
+static int convhkltocolor_cubic(double *U, double *c);
+static int convhkltocolor_orthorhombic(double *U, double *c);
 
 //---------------------- PNG ----------------------------------------
 
@@ -237,7 +239,8 @@ int write_pngs_color(SAMPLE *sample) {
 	ORIENTATION *or=&(v->orientation[maxi]);
 	double c[3];
 
-	convrodtocolor(&(or->r[0]), &c[0]);
+/*	convrodtocolor(&(or->r[0]), &c[0]); */
+	convhkltocolor_orthorhombic(&(or->U[0]), &c[0]);
 
 	pixel->red   = c[0]*255;
 	pixel->green = c[1]*255;
@@ -289,3 +292,63 @@ static int convrodtocolor(double *r, double *c){
   return (SUCCESS);
 }
 
+
+static int convhkltocolor_cubic(double *U, double *c){
+  // converts hkl (U31,U32,U33) to colour in cubic stereographic triangle
+
+  double pi = 3.14159;
+  double beta = 0;
+  int i,j;
+
+  double axis[3];
+  axis[0] = fabs(U[6]);
+  axis[1] = fabs(U[7]);
+  axis[2] = fabs(U[8]);
+
+  for(j=0;j<2;j++){
+    for(i=j+1;i<3;i++){
+      if (axis[j]>axis[i]){
+        c[0]=axis[j];
+        axis[j]=axis[i];
+        axis[i]=c[0];
+      }
+    }
+  }
+
+  double r=sqrt(axis[0]*axis[0]/((axis[2]+1))/((axis[2]+1))+(axis[1]/(axis[2]+1)+1)*(axis[1]/(axis[2]+1)+1));
+  if (axis[1]==0) {
+    beta=0;
+  }
+  else {
+    beta=atan(axis[0]/axis[1]);
+  }
+
+  //normalise colors
+  double exponent = 0.5;
+
+  c[0] = pow((sqrt(2.0)-r)/(sqrt(2.0)-1),exponent); // red
+  c[1] = pow((1-4*beta/pi)*((r-1)/(sqrt(2.0)-1)),exponent); // green
+  c[2] = pow(4*beta/pi*((r-1)/(sqrt(2.0)-1)),exponent); // blue
+
+  return (SUCCESS);
+}
+
+static int convhkltocolor_orthorhombic(double *U, double *c){
+  // converts hkl (U31,U32,U33) to colour in orthorhombic stereographic triangle
+
+  double pi = 3.14159;
+
+  double axis[3];
+  axis[0] = fabs(U[6]);
+  axis[1] = fabs(U[7]);
+  axis[2] = fabs(U[8]);
+
+  //normalise colors
+  double exponent = 0.5;
+
+  c[0] = pow(2*asin(axis[2])/pi,exponent); // red
+  c[1] = pow(2*asin(axis[0])/pi,exponent); // green
+  c[2] = pow(2*asin(axis[1])/pi,exponent); // blue
+
+  return (SUCCESS);
+}
