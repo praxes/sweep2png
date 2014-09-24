@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
 
   SAMPLE sample;
 
-  if(argc!=4) {
-    printf("Usage: sweep2png meshfile png_filestem min_completeness\n");
+  if(argc!=5) {
+    printf("Usage: sweep2png meshfile png_filestem min_completeness lattice\n");
     exit(1);
   }
 
@@ -31,8 +31,13 @@ int main(int argc, char *argv[]) {
     sample.completeness_cut=(double)f1;
   }
 
-  printf("mesh file: %s, png filestem: %s, min completeness: %f\n",
-	 sample.input_meshfile, sample.outputfilestem,sample.completeness_cut);
+  sprintf(sample.lattice,"%s",argv[4]);
+
+  printf("mesh file: %s, png filestem: %s, min completeness: %f, lattice: %s\n",
+	 sample.input_meshfile,
+         sample.outputfilestem,
+         sample.completeness_cut,
+         sample.lattice);
 
   read_mesh(&sample);
 

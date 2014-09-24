@@ -1,0 +1,18 @@
+package:
+  name: sweep2png
+  version: master
+
+requirements:
+  build:
+    - libpng
+  run:
+    - libpng
+
+test:
+  commands:
+    - sweep2png
+
+about:
+  license: LGPL
+  home: https://github.com/praxes/sweep2png
+  summary: High energy diffraction microscopy scripts

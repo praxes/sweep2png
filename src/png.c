@@ -240,10 +240,15 @@ int write_pngs_color(SAMPLE *sample) {
 	ORIENTATION *or=&(v->orientation[maxi]);
 	double c[3];
 
-/*	convrodtocolor(&(or->r[0]), &c[0]);
-	convhkltocolor_cubic(&(or->U[0]), &c[0]);
-	convhkltocolor_hexagonal(&(or->U[0]), &c[0]); */
-	convhkltocolor_orthorhombic(&(or->U[0]), &c[0]);
+        if (strcmp(sample->lattice, "cubic") == 0) {
+          convhkltocolor_cubic(&(or->U[0]), &c[0]);
+        } else if (strcmp(sample->lattice, "hexagonal") == 0) {
+          convhkltocolor_hexagonal(&(or->U[0]), &c[0]);
+        } else if (strcmp(sample->lattice, "orthorhombic") == 0) {
+          convhkltocolor_orthorhombic(&(or->U[0]), &c[0]);
+        } else {
+          convrodtocolor(&(or->r[0]), &c[0]);
+        }
 
 	pixel->red   = c[0]*255;
 	pixel->green = c[1]*255;

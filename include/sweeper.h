@@ -215,6 +215,7 @@ typedef struct {
   double z; /* temporary */
   /* crystallography */
   int nhklfam;
+  char lattice[300];
   /* eta settings */
   double min_eta;
   double max_eta;
