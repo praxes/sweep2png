@@ -1,1 +1,2 @@
-gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/include/ /usr/lib64/libpng.so -lm -o sweep2png 
+gcc -g -O2 -Wall png.c sweep2png.c -I. -Iheader -I/usr/include/ /usr/lib64/libpng.so -lm -o sweep2png
+
