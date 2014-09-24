@@ -8,9 +8,9 @@ requirements:
   run:
     - libpng
 
-test:
-  commands:
-    - sweep2png
+#test:
+#  commands:
+#    - sweep2png
 
 about:
   license: LGPL
