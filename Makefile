@@ -1,5 +1,4 @@
 all:
-	echo $(CFLAGS)
 	gcc -g -O2 -Wall src/png.c src/sweep2png.c -Iinclude $(CFLAGS) -lpng -o sweep2png
 
 install:
