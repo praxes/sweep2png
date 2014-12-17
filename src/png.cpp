@@ -1,6 +1,7 @@
 #include <png.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <math.h>
 #include "crystallography.h"
@@ -97,9 +98,9 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
 
   /* Initialize rows of PNG. */
 
-  row_pointers = png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
+  row_pointers = (png_byte **) png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
   for (y = 0; y < bitmap->height; ++y) {
-    png_byte *row =
+    png_byte *row = (png_byte *)
       png_malloc (png_ptr, sizeof (uint8_t) * bitmap->width * pixel_size);
     row_pointers[y] = row;
     for (x = 0; x < bitmap->width; ++x) {
