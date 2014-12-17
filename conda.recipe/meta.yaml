@@ -2,15 +2,24 @@ package:
   name: sweep2png
   version: master
 
+source:
+  git_url: ../
+
 requirements:
   build:
     - libpng
+    - zlib
   run:
     - libpng
+    - zlib
 
-#test:
-#  commands:
-#    - sweep2png
+test:
+  files:
+    - map
+    - Si_5grains_mesh.log
+  commands:
+    - sweep2png
+    - sweep2png Si_5grains_mesh.log map/Si_70 0.7 cubic
 
 about:
   license: LGPL
