@@ -5,7 +5,6 @@ package:
 source:
   path: ../
 
-
 build:
   detect_binary_files_with_prefix: true
 
@@ -19,9 +18,10 @@ requirements:
 
 test:
   files:
+    - map
     - Si_5grains_mesh.log
-  commands:
-    - sweep2png Si_5grains_mesh.log map/Si_70 0.7 cubic
+#  commands:
+#    - sweep2png Si_5grains_mesh.log map/Si_70 0.7 cubic
 
 about:
   license: LGPL

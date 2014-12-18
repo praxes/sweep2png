@@ -65,39 +65,49 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
 
   fp = fopen (path, "wb");
   if (! fp) {
-    goto fopen_failed;
+      perror("[save_png_to_file] File could not be opened for writing");
+      abort();
   }
 
-  png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  /* initialize */
+  png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
   if (png_ptr == NULL) {
-    goto png_create_write_struct_failed;
+      fclose(fp);
+      perror("[save_png_to_file] png_create_write_struct failed");
+      abort();
   }
 
-  info_ptr = png_create_info_struct (png_ptr);
+  info_ptr = png_create_info_struct(png_ptr);
   if (info_ptr == NULL) {
-    goto png_create_info_struct_failed;
+      png_destroy_write_struct(&png_ptr, &info_ptr);
+      fclose(fp);
+      perror("[save_png_to_file] png_create_info_struct failed");
+      abort();
   }
 
-  /* Set up error handling. */
-
-  if (setjmp (png_jmpbuf (png_ptr))) {
-    goto png_failure;
+  if (setjmp(png_jmpbuf(png_ptr))) {
+      perror("[save_png_to_file] error during init_io");
+      abort();
   }
 
-  /* Set image attributes. */
+  png_init_io(png_ptr, fp);
 
-  png_set_IHDR (png_ptr,
-		info_ptr,
-		bitmap->width,
-		bitmap->height,
-		depth,
-		PNG_COLOR_TYPE_RGB,
-		PNG_INTERLACE_NONE,
-		PNG_COMPRESSION_TYPE_DEFAULT,
-		PNG_FILTER_TYPE_DEFAULT);
-
+  /* write header */
+  if (setjmp(png_jmpbuf(png_ptr))) {
+      perror("[save_png_to_file] error during writing header");
+      abort();
+  }
+  png_set_IHDR(png_ptr,
+               info_ptr,
+               bitmap->width,
+               bitmap->height,
+               depth,
+               PNG_COLOR_TYPE_RGB,
+               PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT,
+               PNG_FILTER_TYPE_DEFAULT);
+  png_write_info(png_ptr, info_ptr);
   /* Initialize rows of PNG. */
-
   row_pointers = (png_byte **) png_malloc (png_ptr, bitmap->height * sizeof (png_byte *));
   for (y = 0; y < bitmap->height; ++y) {
     png_byte *row = (png_byte *)
@@ -111,31 +121,29 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
       *row++ = pixel->blue;
     }
   }
+  /* write bytes */
+  if (setjmp(png_jmpbuf(png_ptr))) {
+      perror("[save_png_to_file] Error during writing bytes");
+      abort();
+  }
+  //png_set_rows(png_ptr, info_ptr, row_pointers);
+  //png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+  printf("1");
+  png_write_image(png_ptr, row_pointers);
+  printf("2");
 
-  /* Write the image data to "fp". */
-
-  png_init_io (png_ptr, fp);
-  png_set_rows (png_ptr, info_ptr, row_pointers);
-  png_write_png (png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
-
-  /* The routine has successfully written the file, so we set
-     "status" to a value which indicates success. */
-
-  status = 0;
+  /* end write */
+  if (setjmp(png_jmpbuf(png_ptr))) {
+      perror("[save_png_to_file] Error during end of write");
+      abort();
+  }
+  png_write_end(png_ptr, NULL);
 
   for (y = 0; y < bitmap->height; y++) {
     png_free (png_ptr, row_pointers[y]);
   }
   png_free (png_ptr, row_pointers);
-
- png_failure:
- png_create_info_struct_failed:
-  png_destroy_write_struct (&png_ptr, &info_ptr);
- png_create_write_struct_failed:
-  fclose (fp);
- fopen_failed:
-
-  return status;
+  return EXIT_SUCCESS;
 }
 
 //--------------------------------------------------------------------
@@ -145,6 +153,8 @@ int write_pngs_confidence(SAMPLE *sample) {
   bitmap_t layer;
   int i,k;
   long N=0;
+  double maxcomp;
+  int maxi;
   char filename[300];
 
   layer.width  = rm->nvx;
@@ -163,8 +173,8 @@ int write_pngs_confidence(SAMPLE *sample) {
 
       pixel_t *pixel = &(layer.pixels[layer.width*v->iy + v->ix]);
 
-      double maxcomp=0.;
-      int maxi=0;
+      maxcomp=0.;
+      maxi=0;
 
       if (v->nU>0){
         maxcomp=v->orientation[0].completeness;
@@ -205,6 +215,9 @@ int write_pngs_color(SAMPLE *sample) {
   bitmap_t layer;
   int i,k;
   long N=0;
+  double maxcomp;
+  double c[3];
+  int maxi;
   char filename[300];
 
   layer.width  = rm->nvx;
@@ -224,8 +237,8 @@ int write_pngs_color(SAMPLE *sample) {
 
       pixel_t *pixel = &(layer.pixels[layer.width*v->iy + v->ix]);
 
-      double maxcomp=0.;
-      int maxi=0;
+      maxcomp=0.;
+      maxi=0;
 
       if (v->nU>0){
         maxcomp=v->orientation[0].completeness;
@@ -239,7 +252,6 @@ int write_pngs_color(SAMPLE *sample) {
 
       if (maxcomp>=sample->completeness_cut && maxcomp>0.) {
 	ORIENTATION *or=&(v->orientation[maxi]);
-	double c[3];
 
         if (strcmp(sample->lattice, "cubic") == 0) {
           convhkltocolor_cubic(&(or->U[0]), &c[0]);
@@ -263,9 +275,12 @@ int write_pngs_color(SAMPLE *sample) {
 
       ++N;
     }
-      /* Write the image to a file 'fruit.png'. */
+
+    /* Write the image to a file 'fruit.png'. */
     sprintf(filename,"%s_%03i.png",sample->outputfilestem,k);
+    printf("%s \n", filename);
     save_png_to_file (&layer, filename);
+    printf("ok");
   }
 
   free(layer.pixels);
@@ -280,17 +295,22 @@ static int convrodtocolor(double *r, double *c){
   // set colour so that all orientations in Cubic space are allowed
   // from matlab script by Grethe Winther.
 
-  double maxhx=62.8*3.14/180; double minhx=-62.8*3.14/180;
+  double maxhx=62.8*3.14/180;
+  double minhx=-62.8*3.14/180;
 
-  double maxhy=62.8*3.14/180; double minhy=-62.8*3.14/180;
+  double maxhy=62.8*3.14/180;
+  double minhy=-62.8*3.14/180;
 
-  double maxhz=62.8*3.14/180; double minhz=-62.8*3.14/180;
+  double maxhz=62.8*3.14/180;
+  double minhz=-62.8*3.14/180;
 
   double rr = sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
 
   double theta=2*atan(rr);
 
-  double r1=r[0]/(rr); double r2=r[1]/(rr); double r3=r[2]/(rr);
+  double r1=r[0]/(rr);
+  double r2=r[1]/(rr);
+  double r3=r[2]/(rr);
 
   //normalise colors
 
@@ -307,6 +327,8 @@ static int convhkltocolor_cubic(double *U, double *c){
 
   double pi = 3.14159;
   double beta = 0;
+  double exponent = 0.5;
+  double r;
   int i,j;
 
   double axis[3];
@@ -324,7 +346,7 @@ static int convhkltocolor_cubic(double *U, double *c){
     }
   }
 
-  double r=sqrt(axis[0]*axis[0]/((axis[2]+1))/((axis[2]+1))+(axis[1]/(axis[2]+1)+1)*(axis[1]/(axis[2]+1)+1));
+  r=sqrt(axis[0]*axis[0]/((axis[2]+1))/((axis[2]+1))+(axis[1]/(axis[2]+1)+1)*(axis[1]/(axis[2]+1)+1));
   if (axis[1]==0) {
     beta=0;
   }
@@ -333,7 +355,6 @@ static int convhkltocolor_cubic(double *U, double *c){
   }
 
   //normalise colors
-  double exponent = 0.5;
 
   c[0] = pow((sqrt(2.0)-r)/(sqrt(2.0)-1),exponent); // red
   c[1] = pow((1-4*beta/pi)*((r-1)/(sqrt(2.0)-1)),exponent); // green
@@ -347,8 +368,25 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   // converts hkl (U31,U32,U33) to colour in hexagonal stereographic triangle
 
   int j;
-
+  double square = 1;
+  double angle = 0;
+  double frac = sqrt(1/3.);
+  double a0 = 1/sqrt(3.);
+  double a1 = 1;
+  double a2 = 1;
+  double exponent = 0.7;
+  double a,x,y,f,s,mx;
+  double g[9];
+  double uvw[3];
+  double uvw_final[3];
+  double Amat[9];
+  double axis[3];
   double rot[108];
+
+  Amat[0] = 0; Amat[1] = 1;         Amat[2] = 0;
+  Amat[3] = 0; Amat[4] = -sqrt(3.); Amat[5] = 1;
+  Amat[6] = 1; Amat[7] = 0;         Amat[8] = 0;
+
   rot[0*9+0]= 1;  rot[0*9+1]= 0;  rot[0*9+2]= 0;
   rot[0*9+3]= 0;  rot[0*9+4]= 1;  rot[0*9+5]= 0;
   rot[0*9+6]= 0;  rot[0*9+7]= 0;  rot[0*9+8]= 1;
@@ -397,19 +435,6 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   rot[11*9+3]= 0;  rot[11*9+4]= -1; rot[11*9+5]= 0;
   rot[11*9+6]= 0;  rot[11*9+7]= 0;  rot[11*9+8]= -1;
 
-  double square=1.;
-  double angle = 0;
-  double frac = sqrt(1/3.);
-  double g[9],uvw[3],uvw_final[3];
-  double a,x,y,f,s;
-  double Amat[9];
-  Amat[0] = 0; Amat[1] = 1;         Amat[2] = 0;
-  Amat[3] = 0; Amat[4] = -sqrt(3.); Amat[5] = 1;
-  Amat[6] = 1; Amat[7] = 0;         Amat[8] = 0;
-  double a0=1/sqrt(3.);
-  double a1=1;
-  double a2=1;
-
   for(j=0;j<12;j++){
     g[0] = U[0]*rot[j*9+0] + U[1]*rot[j*9+3] + U[2]*rot[j*9+6];
     g[1] = U[0]*rot[j*9+1] + U[1]*rot[j*9+4] + U[2]*rot[j*9+7];
@@ -444,8 +469,6 @@ static int convhkltocolor_hexagonal(double *U, double *c){
 
 
   //normalise colors
-  double exponent = 0.7;
-  double axis[3];
   axis[0] = pow(Amat[0]*uvw_final[0]+Amat[3]*uvw_final[1]+Amat[6]*uvw_final[2],exponent);
   axis[1] = pow(Amat[1]*uvw_final[0]+Amat[4]*uvw_final[1]+Amat[7]*uvw_final[2],exponent);
   axis[2] = pow(Amat[2]*uvw_final[0]+Amat[5]*uvw_final[1]+Amat[8]*uvw_final[2],exponent);
@@ -454,7 +477,7 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   c[1] = axis[1]/(a1); // green
   c[2] = axis[2]/(a0); // blue
 
-  double mx=c[0];
+  mx=c[0];
   if (c[1] > mx) { mx = c[1]; }
   if (c[2] > mx) { mx = c[2]; }
 
@@ -470,15 +493,14 @@ static int convhkltocolor_orthorhombic(double *U, double *c){
   // converts hkl (U31,U32,U33) to colour in orthorhombic stereographic triangle
 
   double pi = 3.14159;
-
+  double exponent;
   double axis[3];
   axis[0] = fabs(U[6]);
   axis[1] = fabs(U[7]);
   axis[2] = fabs(U[8]);
 
   //normalise colors
-  double exponent = 0.5;
-
+  exponent = 0.5;
   c[0] = pow(2*asin(axis[2])/pi,exponent); // red
   c[1] = pow(2*asin(axis[0])/pi,exponent); // green
   c[2] = pow(2*asin(axis[1])/pi,exponent); // blue

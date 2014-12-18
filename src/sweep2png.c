@@ -16,6 +16,7 @@ char pngfilestem[300];
 int main(int argc, char *argv[]) {
 
   SAMPLE sample;
+  float f1;
 
   if(argc!=5) {
     printf("Usage: sweep2png meshfile png_filestem min_completeness lattice\n");
@@ -26,7 +27,6 @@ int main(int argc, char *argv[]) {
   sprintf(sample.outputfilestem,"%s",argv[2]);
 
   {
-    float f1;
     sscanf(argv[3],"%g",&f1);
     sample.completeness_cut=(double)f1;
   }
