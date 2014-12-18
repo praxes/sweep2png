@@ -128,9 +128,7 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
   }
   //png_set_rows(png_ptr, info_ptr, row_pointers);
   //png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
-  printf("1");
   png_write_image(png_ptr, row_pointers);
-  printf("2");
 
   /* end write */
   if (setjmp(png_jmpbuf(png_ptr))) {
@@ -278,9 +276,7 @@ int write_pngs_color(SAMPLE *sample) {
 
     /* Write the image to a file 'fruit.png'. */
     sprintf(filename,"%s_%03i.png",sample->outputfilestem,k);
-    printf("%s \n", filename);
     save_png_to_file (&layer, filename);
-    printf("ok");
   }
 
   free(layer.pixels);
