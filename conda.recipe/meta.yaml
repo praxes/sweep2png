@@ -3,7 +3,11 @@ package:
   version: master
 
 source:
-  git_url: ../
+  path: ../
+
+
+build:
+  detect_binary_files_with_prefix: true
 
 requirements:
   build:
@@ -15,10 +19,8 @@ requirements:
 
 test:
   files:
-    - map
     - Si_5grains_mesh.log
   commands:
-    - sweep2png
     - sweep2png Si_5grains_mesh.log map/Si_70 0.7 cubic
 
 about:

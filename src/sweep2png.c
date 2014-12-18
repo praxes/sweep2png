@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
   write_pngs_color(&sample);
   write_pngs_confidence(&sample);
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 static int read_mesh(SAMPLE *sample){
@@ -157,5 +157,5 @@ static int read_mesh(SAMPLE *sample){
 
   fclose(fp);
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }

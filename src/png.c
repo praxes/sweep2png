@@ -197,7 +197,7 @@ int write_pngs_confidence(SAMPLE *sample) {
 
   free(layer.pixels);
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 int write_pngs_color(SAMPLE *sample) {
@@ -270,7 +270,7 @@ int write_pngs_color(SAMPLE *sample) {
 
   free(layer.pixels);
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 
@@ -298,7 +298,7 @@ static int convrodtocolor(double *r, double *c){
   c[1] = (r2*theta-minhy)/(maxhy-minhy); // green
   c[2] = (r3*theta-minhz)/(maxhz-minhz); // blue
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 
@@ -339,7 +339,7 @@ static int convhkltocolor_cubic(double *U, double *c){
   c[1] = pow((1-4*beta/pi)*((r-1)/(sqrt(2.0)-1)),exponent); // green
   c[2] = pow(4*beta/pi*((r-1)/(sqrt(2.0)-1)),exponent); // blue
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 
@@ -462,7 +462,7 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   c[1] = c[1]/(mx); // green
   c[2] = c[2]/(mx); // blue
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
 
 
@@ -483,5 +483,5 @@ static int convhkltocolor_orthorhombic(double *U, double *c){
   c[1] = pow(2*asin(axis[0])/pi,exponent); // green
   c[2] = pow(2*asin(axis[1])/pi,exponent); // blue
 
-  return (SUCCESS);
+  return (EXIT_SUCCESS);
 }
