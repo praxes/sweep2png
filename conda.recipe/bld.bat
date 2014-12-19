@@ -1,6 +1,8 @@
-CALL "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64
+CALL "C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\vcvarsall.bat" amd64
+::dir %RECIPE_DIR%
+xcopy %RECIPE_DIR%\stdint.h include\ /y
 
-cl src\sweep2png.c src\png.c /Iinclude /I%LIBRARY_INC% /link %LIBRARY_LIB%\libpng.lib %LIBRARY_LIB%\zlib.lib
+cl /MD src\sweep2png.c src\png.c /Iinclude /I%LIBRARY_INC% /link %LIBRARY_LIB%\libpng.lib %LIBRARY_LIB%\zlib.lib
 
 if not exist "%SCRIPTS%" mkdir %SCRIPTS%
-cp sweep2png.exe %SCRIPTS%\sweep2png.exe
+xcopy sweep2png.exe %SCRIPTS%\

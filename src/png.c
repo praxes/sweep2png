@@ -52,11 +52,6 @@ int save_png_to_file (bitmap_t *bitmap, const char *path)
   png_infop info_ptr = NULL;
   size_t x, y;
   png_byte ** row_pointers = NULL;
-  /* "status" contains the return value of this function. At first
-     it is set to a value which means 'failure'. When the routine
-     has finished its work, it is set to a value which means
-     'success'. */
-  int status = -1;
   /* The following number is set by trial and error only. I cannot
      see where it it is documented in the libpng manual.
   */
@@ -152,7 +147,6 @@ int write_pngs_confidence(SAMPLE *sample) {
   int i,k;
   long N=0;
   double maxcomp;
-  int maxi;
   char filename[300];
 
   layer.width  = rm->nvx;
@@ -172,13 +166,11 @@ int write_pngs_confidence(SAMPLE *sample) {
       pixel_t *pixel = &(layer.pixels[layer.width*v->iy + v->ix]);
 
       maxcomp=0.;
-      maxi=0;
 
       if (v->nU>0){
         maxcomp=v->orientation[0].completeness;
 	for(i=1;i<v->nU;i++){
 	  if (v->orientation[0].completeness > maxcomp) {
-	    maxi=i;
 	    maxcomp=v->orientation[i].completeness;
 	  }
 	}
@@ -365,13 +357,12 @@ static int convhkltocolor_hexagonal(double *U, double *c){
 
   int j;
   double square = 1;
-  double angle = 0;
   double frac = sqrt(1/3.);
   double a0 = 1/sqrt(3.);
   double a1 = 1;
   double a2 = 1;
   double exponent = 0.7;
-  double a,x,y,f,s,mx;
+  double x,y,f,s,mx;
   double g[9];
   double uvw[3];
   double uvw_final[3];
@@ -431,6 +422,8 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   rot[11*9+3]= 0;  rot[11*9+4]= -1; rot[11*9+5]= 0;
   rot[11*9+6]= 0;  rot[11*9+7]= 0;  rot[11*9+8]= -1;
 
+  uvw_final[0] = uvw_final[1] = uvw_final[2] = 0;
+
   for(j=0;j<12;j++){
     g[0] = U[0]*rot[j*9+0] + U[1]*rot[j*9+3] + U[2]*rot[j*9+6];
     g[1] = U[0]*rot[j*9+1] + U[1]*rot[j*9+4] + U[2]*rot[j*9+7];
@@ -442,7 +435,6 @@ static int convhkltocolor_hexagonal(double *U, double *c){
     g[7] = U[6]*rot[j*9+1] + U[7]*rot[j*9+4] + U[8]*rot[j*9+7];
     g[8] = U[6]*rot[j*9+2] + U[7]*rot[j*9+5] + U[8]*rot[j*9+8];
 
-    a = acos((g[0]+g[4]+g[8]-1)*0.5);
     if (g[8]>0) {
       uvw[0] = g[6];  uvw[1] = g[7];  uvw[2] = g[8];
     }
@@ -454,7 +446,6 @@ static int convhkltocolor_hexagonal(double *U, double *c){
     f = y/x;
     s = x*x+y*y;
     if ((f<=frac)&&(s<=square)&&(x>=0)&&(y>=0)){
-	angle = a;
 	frac = f;
 	square = s;
 	uvw_final[0] = uvw[0];
