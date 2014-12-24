@@ -12,9 +12,6 @@ requirements:
   build:
     - libpng
     - zlib
-  run:
-    - libpng
-    - zlib
 
 test:
   files:
@@ -24,6 +21,6 @@ test:
     - sweep2png Si_5grains_mesh.log map/Si_70 0.7 cubic
 
 about:
-  license: LGPL
+  license: GPL
   home: https://github.com/praxes/sweep2png
   summary: High energy diffraction microscopy scripts
