@@ -9,6 +9,9 @@ requirements:
   build:
     - libpng
     - zlib
+  run:
+    - libpng # [unix]
+    - zlib # [unix]
 
 test:
   files:
