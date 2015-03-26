@@ -460,9 +460,9 @@ static int convhkltocolor_hexagonal(double *U, double *c){
   axis[1] = pow(Amat[1]*uvw_final[0]+Amat[4]*uvw_final[1]+Amat[7]*uvw_final[2],exponent);
   axis[2] = pow(Amat[2]*uvw_final[0]+Amat[5]*uvw_final[1]+Amat[8]*uvw_final[2],exponent);
 
-  c[0] = axis[0]/(a2); // red
-  c[1] = axis[1]/(a1); // green
-  c[2] = axis[2]/(a0); // blue
+  c[0] = axis[0]/(a1); // red
+  c[1] = axis[2]/(a0); // green
+  c[2] = axis[1]/(a2); // blue
 
   mx=c[0];
   if (c[1] > mx) { mx = c[1]; }
