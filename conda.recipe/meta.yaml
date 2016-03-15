@@ -1,14 +1,17 @@
 package:
   name: sweep2png
-  version: master
+  version: 0.1.0
 
 source:
   path: ../
 
 requirements:
   build:
-    - libpng
-    - zlib
+    - libpng # [unix]
+    - zlib # [unix]
+    - libpng-gcc # [win]
+    - zlib-gcc # [win]
+    - mingw #[win]
   run:
     - libpng # [unix]
     - zlib # [unix]
